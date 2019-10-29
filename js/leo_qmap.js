@@ -1,6 +1,6 @@
 var map = null;
 
-var qmapInit = function () {
+var qmapInit = function() {
     var center = new qq.maps.LatLng(22.541941, 113.955903);
     map = new qq.maps.Map(document.getElementById('container'), {
         center: center,
@@ -28,7 +28,7 @@ var qmapInit = function () {
         }
     });
     drawingManager.setMap(map);
-    qq.maps.event.addListener(drawingManager, 'overlaycomplete', function (res) {
+    qq.maps.event.addListener(drawingManager, 'overlaycomplete', function(res) {
         if (res.type == "marker") {
             document.getElementById("info").innerHTML += "点: " + res.overlay.getPosition().lng.toFixed(6) + "_" + res.overlay.getPosition().lat.toFixed(6)
             document.getElementById("info").innerHTML += "<br/>";
@@ -36,12 +36,17 @@ var qmapInit = function () {
 
         if (res.type == "polygon") {
             var paths = [];
-            document.getElementById("info").innerHTML += "多边形: "
-            var path = res.overlay.getPath().forEach(function (e) {
-                document.getElementById("info").innerHTML += e.getLng().toFixed(6) + "_" + e.getLat().toFixed(6) + ";";
+            document.getElementById("info").innerHTML += "多边形: ";
+            var sFirstPos = ""
+            var path = res.overlay.getPath().forEach(function(e) {
+                var sPos = e.getLng().toFixed(6) + "_" + e.getLat().toFixed(6);
+                if (sFirstPos.length == 0) {
+                    sFirstPos = sPos;
+                }
+                document.getElementById("info").innerHTML += sPos + ";";
                 paths.push(new qq.maps.LatLng(e.getLat(), e.getLng()));
             });
-            document.getElementById("info").innerHTML += "<br/>";
+            document.getElementById("info").innerHTML += sFirstPos + "<br/>";
 
             var polygon = new qq.maps.Polygon({
                 map: map,
@@ -68,11 +73,22 @@ var qmapInit = function () {
 var colors = { red: '#F62229', yellow: '#F6E922', green: '#44B901', blue: '#0678E3', purple: '#AC04EA', black: '#000000' };
 
 var markerType = {
-    defalut: '', black: 'marker_black.png', blue: 'marker_blue.png', green: 'marker_green.png', orange: 'marker_orange.png', purple: 'marker_purple.png', red: 'marker_red.png',
-    black_hollow: 'marker_black_hollow.png', blue_hollow: 'marker_blue_hollow.png', green_hollow: 'marker_green_hollow.png', orange_hollow: 'marker_orange_hollow.png', purple_hollow: 'marker_purple_hollow.png', red_hollow: 'marker_red_hollow.png'
+    defalut: '',
+    black: 'marker_black.png',
+    blue: 'marker_blue.png',
+    green: 'marker_green.png',
+    orange: 'marker_orange.png',
+    purple: 'marker_purple.png',
+    red: 'marker_red.png',
+    black_hollow: 'marker_black_hollow.png',
+    blue_hollow: 'marker_blue_hollow.png',
+    green_hollow: 'marker_green_hollow.png',
+    orange_hollow: 'marker_orange_hollow.png',
+    purple_hollow: 'marker_purple_hollow.png',
+    red_hollow: 'marker_red_hollow.png'
 };
 
-var drawPolygon = function (polygonStr, lonLatDelimiter = ',', posDelimiter = ';', color = colors.blue) {
+var drawPolygon = function(polygonStr, lonLatDelimiter = ',', posDelimiter = ';', color = colors.blue) {
     if (polygonStr) {
         var polygonStrs = polygonStr.split(posDelimiter);
         if (polygonStrs.length > 1) {
@@ -94,7 +110,7 @@ var drawPolygon = function (polygonStr, lonLatDelimiter = ',', posDelimiter = ';
                 path: polygonPath,
                 strokeColor: color,
                 strokeWeight: 2,
-                fillColor: new qq.maps.Color(0, 45, 168, 0.3),
+                fillColor: new qq.maps.Color(0, 45, 168, 0.3), //new qq.maps.Color(0, 45, 168, 0.3)
                 map: map
             });
             map.panTo(mcenter);
@@ -102,7 +118,16 @@ var drawPolygon = function (polygonStr, lonLatDelimiter = ',', posDelimiter = ';
     }
 };
 
-var drawMarker = function (lon, lat, label = '', mt = markerType.defalut, delta = 0) {
+var drawMultiPolygon = function(polygonStr, lonLatDelimiter = ',', posDelimiter = ';', color = colors.blue, polygonDelimiter = '|') {
+    if (polygonStr) {
+        var polygonStrs = polygonStr.split(polygonDelimiter);
+        for (j = 0; j < polygonStrs.length; j++) {
+            drawPolygon(polygonStrs[j], lonLatDelimiter, posDelimiter, color);
+        }
+    }
+}
+
+var drawMarker = function(lon, lat, label = '', mt = markerType.defalut, delta = 0) {
     var pos = new qq.maps.LatLng(lat + delta, lon + delta);
     var marker = null;
 
@@ -134,7 +159,7 @@ var drawMarker = function (lon, lat, label = '', mt = markerType.defalut, delta 
     map.panTo(pos);
 };
 
-var drawLabel = function (lon, lat, label = '') {
+var drawLabel = function(lon, lat, label = '') {
     pos = new qq.maps.LatLng(lat, lon);
     if (label.length > 0) {
         var label = new qq.maps.Label({
@@ -146,7 +171,7 @@ var drawLabel = function (lon, lat, label = '') {
     map.panTo(pos);
 };
 
-var drawCirle = function (lon, lat, radius = 2, strokeColor = colors.blue) {
+var drawCirle = function(lon, lat, radius = 2, strokeColor = colors.blue) {
     pos = new qq.maps.LatLng(lat, lon);
     var cirle = new qq.maps.Circle({
         center: pos,
@@ -159,7 +184,7 @@ var drawCirle = function (lon, lat, radius = 2, strokeColor = colors.blue) {
     map.panTo(pos);
 };
 
-var drawLine = function (lonFrom, latFrom, lonTo, latTo, strokeWeight = 2, strokeColor = colors.blue) {
+var drawLine = function(lonFrom, latFrom, lonTo, latTo, strokeWeight = 2, strokeColor = colors.blue) {
     posFrom = new qq.maps.LatLng(latFrom, lonFrom);
     posTo = new qq.maps.LatLng(latTo, lonTo);
     var polyline = new qq.maps.Polyline({
@@ -171,7 +196,7 @@ var drawLine = function (lonFrom, latFrom, lonTo, latTo, strokeWeight = 2, strok
     map.panTo(posFrom);
 };
 
-var drawNetwork = function (nodes, edges) {
+var drawNetwork = function(nodes, edges) {
     pos = null;
     for (i = 0; i < nodes.length; i++) {
         drawCirle(nodes[i].lon, nodes[i].lat, nodes[i].value, nodes[i].color);
@@ -190,7 +215,7 @@ var drawNetwork = function (nodes, edges) {
     map.panTo(pos);
 };
 
-var drawMarkers = function (sMarkers, lonLatDelimiter = '_', posDelimiter = ';', mt = markerType.defalut, delta = 0) {
+var drawMarkers = function(sMarkers, lonLatDelimiter = '_', posDelimiter = ';', mt = markerType.defalut, delta = 0) {
     var markers = sMarkers.split(posDelimiter);
     for (i = 0; i < markers.length; i++) {
         var pos = markers[i].split(lonLatDelimiter);
@@ -204,18 +229,16 @@ var drawMarkers = function (sMarkers, lonLatDelimiter = '_', posDelimiter = ';',
     }
 }
 
-var drawHeat = function (heatData) {
+var drawHeat = function(heatData) {
     //地图异步加载，在idle或者tilesloaded后初始化
-    qq.maps.event.addListenerOnce(map, "idle", function () {
+    qq.maps.event.addListenerOnce(map, "idle", function() {
         if (QQMapPlugin.isSupportCanvas) {
-            heatmap = new QQMapPlugin.HeatmapOverlay(map,
-                {
-                    "radius": 1, //点半径，设置为1即可
-                    "maxOpacity": 0.8, //热力图最大透明度
-                    "useLocalExtrema": false,//是否在每一屏都开启重新计算，如果为true则每一屏都会有一个红点
-                    "valueField": 'count'//设置大小字段
-                }
-            );
+            heatmap = new QQMapPlugin.HeatmapOverlay(map, {
+                "radius": 1, //点半径，设置为1即可
+                "maxOpacity": 0.8, //热力图最大透明度
+                "useLocalExtrema": false, //是否在每一屏都开启重新计算，如果为true则每一屏都会有一个红点
+                "valueField": 'count' //设置大小字段
+            });
             //绘制热力图         
             heatmap.setData(heatData);
         } else {
@@ -227,15 +250,15 @@ var drawHeat = function (heatData) {
     map.panTo(pos);
 
     //
-    qq.maps.event.addListener(map, 'mousemove', function (event) {
+    qq.maps.event.addListener(map, 'mousemove', function(event) {
         var latLng = event.latLng,
-            lat = latLng.getLat().toFixed(3),
-            lng = latLng.getLng().toFixed(3)
+            lat = latLng.getLat().toFixed(4),
+            lng = latLng.getLng().toFixed(4)
         count = 0;
 
         fLen = heatData.data.length;
         for (i = 0; i < fLen; i++) {
-            if (heatData.data[i]["lng"] == lng && heatData.data[i]["lat"] == lat) {
+            if (heatData.data[i]["lng"].toFixed(4) == lng && heatData.data[i]["lat"].toFixed(4) == lat) {
                 count = heatData.data[i]["count"];
                 break;
             }
